@@ -215,3 +215,233 @@ Contar quantos elementos tem em um vetor com o count;
 Adicionar elementos ao vetor com o conj;
 Que o Clojure é imutável;
 Criar função com defn.
+
+#### 16/10/2023
+
+@02-Simbolos e condicionais
+
+@@01
+Símbolos locais versus globais ao namespace e a existência de bigint e bigdecimal
+
+Terminamos a aula anterior criando a seguinte função:
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (* valor-bruto (- 1 0.10)))COPIAR CÓDIGO
+Porém, essa operação (- 1 0.10) parece meio estranha, não? O 0.10 é o desconto que queremos aplicar, e talvez fosse melhor definirmos um símbolo que deixasse isso mais claro. Sendo assim, depois de passarmos o parâmetro [valor-bruto], usaremos (def desconto 0.10) para definirmos esse símbolo, que passaremos adiante na execução de `(* valor-bruto (- 1 desconto))
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (def desconto 0.10)
+  (* valor-bruto (- 1 desconto)))COPIAR CÓDIGO
+Feito isso, se executarmos (valor-descontado 100), teremos como retorno 90.0, o que significa que nosso código continua funcionando. Lembra que, anteriormente, vimos que o def define algo que parece uma variável global no nosso namespace? Vamos testar isso chamando o símbolo desconto. Como retorno, teremos 0.1.
+
+Acabamos de descobrir uma péssima infração das boas práticas em programação, afinal definimos um símbolo global dentro de uma função. Isso inclusive poderia significar que esse símbolo talvez já existisse, e nós somente o redefinimos, pois não temos controle total do nosso espaço de desenvolvimento para termos certeza que um símbolo desconto já não havia sido definido.
+
+O ideal seria definirmos um símbolo local ao espaço da função (valor-descontado), e não a todo o nosso namespace. Para isso, ao invés de utilizarmos def, que define um símbolo, usaremos let, que recebe um vetor - no nosso caso, [desconto 0.10].
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (let [desconto 0.10])
+  (* valor-bruto (- 1 desconto)))COPIAR CÓDIGO
+Se executarmos esse código no nosso interpretador e em seguida chamarmos (valor-descontado 100), tudo parecerá funcionará como esperado. Porém, se sairmos do interpretador ("Ctrl + D", "Ctrl + C" ou "exit", dependendo do seu sistema operacional) e tentaros definir a função (valor-descontado) novamente, receberemos um erro informando que não foi possível resolver o símbolo desconto nesse contexto.
+
+Por que isso acontece? Estamos em um espaço de memória completamente novo, e o let define a variável desconto somente dentro do próprio parênteses. Sendo assim, quando tentamos usar o símbolo desconto em (* valor-bruto (- 1 desconto)), ele não existe. Ou seja, o let trabalha apenas em escopo local.
+
+Pensando nisso, por que o nosso código havia funcionado anteriormente? Na realidade, havíamos definido um símbolo chamado desconto anteriormente, de maneira global, e ele ficou na memória. Isso também serve para nos mostrar o quão inapropriado é criarmos um símbolo global quando queremos trabalhar localmente, gerando efeitos inesperados no nosso código.
+
+Para resolver esse problema, o (let) recebe, depois do símbolo que irá definir, uma série de instruções a serem executadas. Sendo assim, passaremos a função (* valor-bruto (- 1 desconto)) para dentro dele.
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (let [desconto 0.10]
+  (* valor-bruto (- 1 desconto))
+ )
+)
+
+(valor-descontado 100)COPIAR CÓDIGO
+Assim, o (let) executará as operações dentro dele e retornará o resultado da última instrução. Como só temos uma instrução, ele retornará o desconto. Se executarmos o código acima, teremos como retorno 90.0, do jeito que esperávamos. Para testarmos a devolução do (let) e a existência do símbolo desconto na memória, faremos um println com a mensagem "Calculando desconto de" e o símbolo desconto.
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (let [desconto 0.10]
+  (println "Calculando desconto de" desconto)
+  (* valor-bruto (- 1 desconto))
+   )
+   )
+
+(valor-descontado 100)COPIAR CÓDIGO
+Como retorno, teremos:
+
+Calculando desconto de 0.1
+90.0
+
+Ou seja, o retorno do (let) é o resultado da última instrução, nesse caso o desconto. Note também que o retorno do (println) é ignorado. Se quisermos, podemos adicionar uma série de instruções ao nosso (let).
+
+Os vários parênteses no nosso código nos remetem a diversas outras linguagens, mas devemos tomar cuidado com a organização do código, que é diferente no Clojure. Normalmente abrimos parênteses em uma nova linha, exceto em instruções curtas, ainda que algumas pessoas (como nosso instrutor) prefiram não fazer isso. Já o fechamento dos parênteses é feito todo na mesma linha.
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (let [desconto 0.10]
+    (println "Calculando desconto de" desconto)
+    (* valor-bruto (- 1 desconto))))COPIAR CÓDIGO
+Uma das vantagens dessa formatação é deixar bastante claro qual é a última instrução de retorno que está sendo executada. Lembre-se que a ideia não é mantermos menos caracteres, afinal um Enter a mais ou a menos não faz diferença nenhuma no nosso código, mesmo visualmente.
+
+Para continuarmos nossos testes, vamos alterar o valor do desconto para (/ 10 100), ou seja, 10 dividido por 100, que é 10%.
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (let [desconto (/ 10 100)]
+    (println "Calculando desconto de" desconto)
+    (* valor-bruto (- 1 desconto))))COPIAR CÓDIGO
+Se executarmos esse código e rodarmos (valor descontado 100), teremos como retorno:
+
+90N
+No exemplo anterior, nossa devolução era 90.0, um Double. Uma maneira de confirmarmos isso é com a função (class 90.0), que nos retornará java.lang.Double. Mas e o 90N? Se verificarmos com (class 90N), veremos que ele é um clojure.lang.BigInt. Ou seja, o Clojure nos dá suporte para trabalhar com BigInt e BigDecimal diretamente. Ainda assim, existem alguns cuidados importantes que devemos tomar quando trabalhamos com eles. Como por padrão não faremos isso, não precisarems nos preocupar tanto.
+
+Assim como N representa o BigInt, o M representa o BigDecimal, que trabalha com precisões maiores (até infinita) de números com ponto flutuante.
+
+Com isso, aprendemos a trabalhar com funções que lidam com símbolos locais no Clojure, evitando símbolos locais que atrapalhem o nosso espaço de desenvolvimento. Claro, ainda há muito o que aprender dessa linguagem, e continuaremos nossos estudos no próximo vídeo.
+
+@@02
+Let múltiplo e condicionais
+
+Vamos continuar trabalhando na função que criamos anteriormente, explorando alguns casos diferentes. Começaremos alterando o símbolo desconto, que criamos usando o let, para taxa-de-desconto, de modo a deixarmos mais claro o que ele representa. Já o desconto real é a multiplicação de 0.1 pelo valor bruto. Sendo assim, da mesma maneira que definimos o símbolo taxa-de-desconto, podemos definir outros símbolos usando o let novamente, por exemplo o nosso desconto.
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (let [taxa-de-desconto (/ 10 100)]
+    (let [desconto (* valor-bruto taxa-de-desconto)])
+    (println "Calculando desconto de" desconto)
+    (* valor-bruto (- 1 desconto))))
+COPIAR CÓDIGO
+Com isso teríamos vários (let), um dentro do outro. Mas será que essa é a melhor forma? Na verdade, como o (let) é um vetor, ele pode receber mais de dois valores. Pensando nisso, além da taxa-de-desconto, poderemos definir o desconto como sendo a multiplicação de valor-bruto pela taxa-de-desconto.
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (let [taxa-de-desconto (/ 10 100)
+        desconto (* valor-bruto taxa-de-desconto)]
+    (println "Calculando desconto de" desconto)
+    (* valor-bruto (- 1 desconto))))COPIAR CÓDIGO
+Assim, se o valor-bruto for 100, o desconto será a multiplicação de 0.1 por 100, que é 10. Por último, substituiremos 1 pelo valor-bruto.
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (let [taxa-de-desconto (/ 10 100)
+        desconto (* valor-bruto taxa-de-desconto)]
+    (println "Calculando desconto de" desconto)
+    (* valor-bruto (- valor-bruto desconto))))COPIAR CÓDIGO
+Se definirmos a função dessa forma e executarmos (valor-descontado) no terminal, teremos como retorno... 9000N? Isso acontece pois nos esquecermos de remover o trecho (* valor bruto (...)), que faz uma multiplicação extra dos nossos valores.
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10%."
+  [valor-bruto]
+  (let [taxa-de-desconto (/ 10 100)
+        desconto (* valor-bruto taxa-de-desconto)]
+    (println "Calculando desconto de" desconto)
+    (- valor-bruto desconto)))COPIAR CÓDIGO
+Feita a redefinição, se executarmos (valor-descontado 100), o retorno será 90N, do jeito que esperávamos. Com isso, aprendemos que o (let) pode definir vários símbolos.
+
+Agora determinaremos que a nossa regra de desconto só será aplicada para valores acima de 100 reais, excluindo o próprio 100. Mas como fazer um if em Clojure? Existem várias maneiras de trabalharmos com condições, e a mais simples delas é o (if), um condicional após o qual escrevemos uma situação que devolverá verdadeiro (true) ou falso (false), da mesma forma que estamos acostumados a trabalhar.
+
+Por exemplo, se executarmos (> 500 100), teremos como retorno true, afinal 500 é maior do que 100. Já se executarmos (< 500 100), o retorno será false, pois essa condição não é verdadeira. Criaremos então o nosso (if) dessa maneira, verificando se 500 é maior do que 100 e, em caso positivo, imprimindo na tela a mensagem maior.
+
+(if (> 500 100)
+  (println "maior"))COPIAR CÓDIGO
+Executando esse código, teremos como retorno:
+
+maior
+nil
+
+No Clojure, o (if) recebe três argumentos: a verificação, o que deverá ser executado caso o retorno da verificação seja verdadeiro, e o que deverá executado caso esse retorno seja falso, da mesma maneira que o else já conhecido da programação. Para testarmos, vamos verificar se o número 500 é maior do que 100.
+
+(if (> 50 100)
+  (println "maior")
+  (println "menor ou igual"))COPIAR CÓDIGO
+Como retorno, teremos "menor ou igual", assim como esperávamos. Agora, queremos que a nossa função (valor-descontado) retorno o valor com desconto de 10% se o valor bruto for estritamente maior que 100, deixando claro que 100 não está incluso. Para isso, depois de recebermos o [valor-bruto], abriremos o nosso (if) e incluiremos nele a nossa verificação. Em seguida, como retorno em caso verdadeiro, executaremos todo o código a partir do (let).
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se o valor bruto for estritamente maior que 100."
+  [valor-bruto]
+  (if (> valor-bruto 100)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto (* valor-bruto taxa-de-desconto)]
+      (println "Calculando desconto de" desconto)
+      (- valor-bruto desconto))))COPIAR CÓDIGO
+Feita essa definição, se executarmos (valor-descontado 1000), teremos como retorno 900. Já se executarmos (valor-descontado 100), o retorno será nil. Isso porque o (if) executa um código em caso verdadeiro, mas não definimos nada para ser executado em caso falso, e, por padrão, a devolução é nula. Além disso, o nil é considerado falso, algo que pode ser verificado com o seguinte exemplo:
+
+(if nil "verdadeiro" "falso")COPIAR CÓDIGO
+Como esperado, o retorno dessa execução será "falso". Isso pode nos ajudar bastante quando queremos verificar se algo existe,já que, na prática, qualquer coisa exceto false e nil é considerado verdadeiro (true) pelo (if).
+
+Como não queremos que a devolução do nosso (valor-descontado) para valores brutos menores ou iguais a 100 seja nula, vamos definir que, nesses casos, deveremos receber somente o valor-bruto.
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se o valor bruto for estritamente maior que 100."
+  [valor-bruto]
+  (if (> valor-bruto 100)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto (* valor-bruto taxa-de-desconto)]
+      (println "Calculando desconto de" desconto)
+      (- valor-bruto desconto))
+      valor-bruto))COPIAR CÓDIGO
+Note que está ficando cada vez mais difícil trabalhar com o encadeamento de parênteses, mas isso é algo que resolveremos mais tarde, quando passarmos para uma IDE. Depois de definirmos a função, se executarmos (valor-descontado 1000), o retorno será 900N. Já se executarmos (valor-descontado 100), o retorno será 100.
+
+Voltando à questão da dificuldade de lidar com esse volume de código da maneira que estamos trabalhando agora, podemos salvar o arquivo como aula2.clj para que as funções, os operadores e os valores sejam coloridos, facilitando a leitura.
+
+Porém, isso não é o suficiente, já que ainda é muito fácil errarmos os parênteses. Resolveremos esse problema trabalhando com IDEs como o IntelliJ, que nos dará suporte ao longo do curso.
+
+@@03
+Faça como eu fiz na aula
+
+Chegou a hora de você seguir todos os passos realizados por mim durantes esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito. Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
+
+O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha certeza de que tudo está certo antes de continuar. Ficou com dúvida? Podemos te ajudar pelo nosso fórum.
+
+@@04
+Para saber mais
+
+BigInt e BigDecimal não vão apresentar os tradicionais erros silenciosos de estouro em algumas linguagens, isto é, pegue o maior número de um Long e some 1, ele estoura. Pegue o menor Long possível e tire 1, ele estoura. Em Clojure, se o tipo de seu dado é Long ou Double ele automaticamente é passado para BigInt e BigDecimal, evitando tais situações, entre outros benefícios.
+
+@@05
+Para saber mais
+
+Para ser um pouco mais formal, if é uma forma, não é uma função, e é uma forma especial https://clojure.org/reference/special_forms#if. Na prática, formas especiais podem ser utilizadas em nosso código e se misturam com as funções que invocamos em diversos momentos. Em geral, serão formas especiais aquelas que formam a base mínima da linguagem, uma maneira tradicional que as linguagens encontram para que a maior parte da mesma seja implementada na própria linguagem. Por exemplo, a função count é escrita na linguagem Clojure utilizando condicionais. Na prática, formas como if, let etc e funções aparecem misturadas em nosso código o tempo todo e por vício de linguagem é comum chamar uma forma especial de função, apesar da mesma ser uma forma.
+
+https://clojure.org/reference/special_forms#if
+
+@@06
+Símbolos locais ou globais?
+
+Em muitas linguagens é comum definirmos variáveis locais a um método, ou globais a um namespace ou todo o código. Em Clojure, assim como em outras linguagens, qual a boa prática considerando símbolos locais e globais?
+
+Usar símbolos globais sempre que possível, facilitando o acesso ao que é necessário de qualquer ponto da aplicação.
+ 
+Se qualquer ponto da aplicação pode ler um valor, mesmo que somente leitura, você perde controle do que pode ser feito com ele. Perda de encapsulamento.
+Alternativa correta
+Usar símbolos globais somente quando locais não resolvem o problema, raramente.
+ 
+É muito raro ser necessário um símbolo global que represente valores que não são funções. Isso acontece da mesma forma que em outras linguagens de programação tentamos evitar variáveis globais o máximo possível. Quanto maior o escopo, menor o controle, mais difícil de manter o código.
+Alternativa correta
+Usar símbolos locais somente quando globais não resolvem o problema.
+ 
+Quase sempre podemos usar símbolos globais, mas o código resultante fica uma bagunça, uma vez que não controlamos o que está sendo acessado.
+
+@@07
+O que aprendemos?
+
+O que aprendemos nesta aula:
+Definir uma variável com def ela tem o escopo global, dependendo do namespace;
+Algumas boas práticas com Clojure;
+Criar uma variável de escopo local com o let;
+Utilizar o class para descobrir o tipo da variável;
+Trabalhar com condicionais if;
+Que o nil(Nulo) é considerado false dentro do if.
+
