@@ -519,3 +519,441 @@ Que o nil(Nulo) é considerado false dentro do if.
 
 (valor-descontado 100)
 ```
+
+#### 17/10/2023
+
+@03-Primeiros passos com colecoes
+
+@@01
+Projeto da aula anterior
+
+Caso queira, você pode baixar o projeto do curso no ponto em que paramos na aula anterior.
+
+https://github.com/alura-cursos/clojure-introducao/archive/aula2.zip
+
+@@02
+Intellij, Leiningen e atalhos
+
+Como citado na aula anterior, a partir de agora passaremos a utilizar o IntelliJ IDEA, uma IDE que possui uma versão paga e outra gratuita para comunidades, e ambas podem ser baixadas aqui.
+Após a instalação, da primeira vez que o IntelliJ é executado, seremos perguntados se queremos importar as configurações de algum outro lugar. Se é a primeira vez que você está trabalhando com essa IDE, não recomendamos fazer isso, para que você já se acostume a essa configuração. Na tela de customização, podemos clicar em "Skip Remaining and Set Defaults" para mantermos a configuração padrão.
+
+Para podermos trabalhar com o Clojure, será necessário instalarmos um plugin chamado "Cursive", o que pode ser feito acessando "Configure > Plugins" e pesquisando por esse nome. Após a instalação, reiniciaremos a IDE.
+
+Criaremos então um novo projeto do tipo "Clojure", selecionando essa opção do lado esquerdo da tela. Dentro dela, usaremos o Leiningen, uma ferramenta que serve para criar aplicativos do tipo Clojure. O nome do projeto será "estoque" e criaremos um diretório "curso" para salvá-lo, clicando em "Finish" em seguida.
+
+Na nova tela, fecharemos as janelas desnecessárias. Repare que, no canto inferior direito da tela, algumas atualizações do Cursive estarão sendo feitas em segundo plano. Para acessarmos o nosso projeto, clicaremos em "1.Project" no canto esquerdo da tela. Logo no início, teremos somente um arquivo curso.iml dentro do diretório escolhido. À medida em que o projeto é propriamente criado, os outros arquivos e diretórios aparecerão na tela.
+
+Ao longo do curso trabalharemos somente com aquilo que é interessante para nossos estudos. Em "src", por exemplo, colocaremos o nosso código fonte. Dentro dessa pasta, teremos um diretório "curso" contendo um arquivo core.clj, o núcleo do projeto, onde poderemos trabalhar. Por enquanto ele contém uma definição simples de uma função (foo), que removeremos.
+
+(ns curso.core)
+
+(defn foo
+  "I don't do a whole lot."
+  [x]
+  (println x "Hello, World!"))
+COPIAR CÓDIGO
+Acessando "IntelliJ IDEA > Preferences" no Mac ou "File > Settings" no Windows, podemos fazer algumas configurações de visualização, como aumentar o tamanho da fonte da interface ou do editor de texto. Também é possível utilizar o atalho "Ctrl + Shift + A", ou "Command + Shift + A", para acessar o buscador dessa IDE. Depois disso, podemos pesquisar por "Increase Font Size" para aumentar em dois pontos a fonte. Esse buscador também pode ser acessado com "Shift > Shift".
+
+Note que o arquivo curso.core está utilizando o namespace curso.core. Sendo assim, da mesma forma que quando trabalhamos com o namespace user no terminal, todo o código que escrevermos nesse arquivo estará em um espaço chamado curso.core, como os packages ou namespaces de outras linguagens.
+
+Para começarmos a trabalhar, faremos um (println) da mensagem "Bem vindo ao sistema de estoque" e salvaremos as alterações com "Command + S" ou "Ctrl + S".
+
+(ns curso.core)
+
+(println "Bem vindo ao sistema de estoque")COPIAR CÓDIGO
+Em seguida, clicaremos com o botão direito em project.clj e então em "Run 'REPL for curso'". O REPL (read-eval-print-loop) é como uma linha de comando na qual podemos executar e avaliar o nosso código durante o desenvolvimento. Já que ele funciona como um terminal, também podemos executar código diretamente da janela do REPL.
+
+Quando executamos o REPL pela primeira vez, o curso.core foi carregado automaticamente, imprimindo na tela a mensagem que escrevemos. Sendo assim, todo o código que criarmos nesse arquivo será carregado toda vez que o REPL for executado.
+
+Para continuarmos trabalhando, moveremos o arquivo aula2.clj, que criamos na aula anterior, para o diretório "src/curso". Nesse arquivo, podemos utilizar o ; para comentarmos uma linha, o que faremos com a instrução * valor-bruto 0.9.
+
+Antes de executarmos o arquivo, é uma boa prática do Clojure colocarmos esse código em um namespace, cujo padrão é o nome do arquivo. Como estamos dentro do diretório "curso", nosso namespace (ns) será curso.aula2.
+
+(ns curso.aula2)COPIAR CÓDIGO
+Para carregarmos esse arquivo e executarmos todo o conteúdo contido nele no REPL, podemos utilizar o comando "Ctrl + Shift + F10" ou "Command + Shift + L". Devemos tomar alguns cuidados, por exemplo com o (aplica-desconto). Quando estávamos no terminal, o resultado das funções era mostrado. Agora, somente os valores que pedirmos para imprimir é que serão mostrados na tela.
+
+(println (aplica-desconto 100))COPIAR CÓDIGO
+Na interface encontraremos diversas opções de execução e configuração do REPL. Na janela dele, por exemplo, podemos limpar a tela clicando no ícone de lixeira. Essa IDE nos traz diversas vantagens para trabalharmos com o Clojure. Por exemplo, podemos selecionar um trecho de código e abrir parênteses para que ele seja automaticamente englobado por eles, facilitando a criação de novas funções.
+
+Também é possível criarmos uma função, por exemplo (println), fora de uma instrução, e utilizarmos o atalho "Command + Shift + K" ("Alt + Shift + K", no Windows) para a "engolirmos" para dentro da função (println) recém-criada, o que é chamado de "slurp". Da mesma forma, o "Command + Shift + J" ("Alt + Shift + J") move a última fórmula para fora da função, o que chamamos de "barf". Esses e outros atalhos podem ser encontrados em "Edit > Structural Editing".
+
+Se quisermos executar somente uma fórmula específica, colocamos o curso nela e utilizamos o atalho Command + Shift + P. Note que esse atalho executa o código já no escopo atual, nesse caso o namespace curso.aula2. Para utilizarmos esse namespace no REPL, podemos executar (use curso.aula2).
+
+No Mac, o atalho "Command + 1" serve para ocultar a aba lateral do projeto, permitindo uma visualização melhor do nosso código. Vários desses atalhos podem ser alterados nas preferências do IntelliJ ("Preferences/Settings > Keymap").
+
+No próximo vídeo voltaremos a trabalhar com código.
+
+https://www.jetbrains.com/idea/download/
+
+https://cursive-ide.com/userguide/
+
+@@03
+Predicados, when e binding em tempo de execução
+
+Para continuarmos a trabalhar, criaremos um novo arquivo chamado aula3.clj, no qual adicionaremos o namespace curso.aula3, além da última versão da função (valor-descontado).
+(ns curso.aula3)
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se o valor bruto for estritamente maior que 100."
+  [valor-bruto]
+  (if (> valor-bruto 100)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto         (* valor-bruto taxa-de-desconto)]
+      (println "Calculando desconto de " desconto)
+      (- valor-bruto desconto))
+    valor-bruto))
+
+(valor-descontado 1000)
+
+(valor-descontado 100)COPIAR CÓDIGO
+Antes de prosseguirmos, removeremos o (println) da nossa função, que estávamos utilizando somente para entendermos o que estava acontecendo na execução. Adicionaremos então o (println) às linhas que executam (valor-descontado 1000) e (valor-descontado 100).
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se o valor bruto for estritamente maior que 100."
+  [valor-bruto]
+  (if (> valor-bruto 100)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto         (* valor-bruto taxa-de-desconto)]
+      (- valor-bruto desconto))
+    valor-bruto))
+
+(println (valor-descontado 1000))
+
+(println (valor-descontado 100))COPIAR CÓDIGO
+Agora vamos propor uma pergunta: na prática, é comum fazermos tanta coisa dentro de uma única função? Na verdade depende. Em qualquer linguagem de programação, uma função que tem muitos caminhos lógicos tem alta complexidade de compreensão - existe até um termo formal, "complexidade ciclomática", que aparece nos nossos cursos de qualidade de código.
+
+A complexidade ciclomática faz com que seja difícil entender o que está acontecendo na nossa função, afinal, ela inclui um if e um else, além da definição de duas variáveis, operações matemáticas e impressão de dados na tela. Podemos julgar que essa complexidade é razoável e manter a função como está, mas também é possível quebrá-la em pedaços menores.
+
+Algumas vantagens de trabalharmos com funções pequenas são a reutilização, a composição e a facilidade de compreensão. Pensando nesses pontos, a ideia é extrairmos o (if) para uma nova função.
+
+É comum que funções que devolverão um comportamento do tipo "verdadeiro ou falso" (mas não necessariamente true ou false) tenham um ponto de interrogação no final. Sendo assim, faremos (defn deve-aplicar-desconto?) para criarmos uma função com esse nome. Ela deverá receber um [valor-bruto] e, em seguida, verificar ((if)) se valor-bruto é maior do que 100. Em caso positivo, ela retornará true, e em caso negativo retornará false.
+
+Para testarmos, faremos um (println) da execução de deve-aplicar-desconto? para os valores 1000 e 100.
+
+(defn deve-aplicar-desconto?
+  [valor-bruto]
+  (if (> valor-bruto 100)
+    true
+    false))
+(println (deve-aplicar-desconto? 1000))
+(println (deve-aplicar-desconto? 100))COPIAR CÓDIGO
+Repare que, agora que estamos utilizando a IDE, escrever esse código ficou bem mais simples, já que o alimento é feito automaticamente e recebemos sugestões de autopreenchimento ao longo do processo. Uma dica: com a tecla "TAB" podemos confirmar a opção selecionada de autopreenchimento.
+
+Ao executarmos, receberemos na tela true e false, o que indica que nosso código está funcionando. Funções que devolvem esses valores, e que normalmente recebem ponto de interrogação, são chamadas de "Predicates". Pensando sobre sua nomenclatura, podemos renomeá-la como aplica-desconto?, que já passa a ideia de uma verificação do tipo "verdadeiro ou falso".
+
+; PREDICATE
+(defn aplica-desconto?
+  [valor-bruto]
+  (if (> valor-bruto 100)
+    true
+    false))
+(println (aplica-desconto? 1000))
+(println (aplica-desconto? 100))
+(deve-aplicar-desconto?)COPIAR CÓDIGO
+Vamos então redefinir a função (valor-desconto). Agora, ao invés de fazermos a verificação (> valor-bruto 100), simplesmente chamaremos a função (aplica-desconto) passando como argumento o valor-bruto.
+
+; PREDICATE
+(defn aplica-desconto?
+  [valor-bruto]
+  (if (> valor-bruto 100)
+    true
+    false))
+(println (aplica-desconto? 1000))
+(println (aplica-desconto? 100))
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se o valor bruto for estritamente maior que 100."
+  [valor-bruto]
+  (if (aplica-desconto? valor-bruto)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto         (* valor-bruto taxa-de-desconto)]
+      (- valor-bruto desconto))
+    valor-bruto))
+
+(println (valor-descontado 1000))
+
+(println (valor-descontado 100))
+COPIAR CÓDIGO
+Ao longo da escrita do código, repare que, enquanto não passamos um parâmetro valor-bruto para a função (aplica-desconto?), sua chamada é sublinhada em vermelho. Colocando o mouse sobre ela, a mensagem "Incorret arity 0 for curso.aula?/aplica-desconto?" será exibida. "Arity", ou "aridade", é o número de parâmetros passados, e "aridade 0" se refere à primeira posição, ou seja, ao primeiro parâmetro. Se segurarmos "Command" (ou "Ctrl" no Windows) e clicarmos na chamada da função, seremos levados diretamente ao código fonte dela.
+
+Como resultado da execução desse código, os valores 900N e 100 serão exibidos corretamente na tela. Nossa aplicação funcona, mas o (if) está retornando true e false. Existem casos em que é muito comum que a devolução da situação contrária, ou seja, false, seja na verdade nulo, como no exemplo:
+
+; PREDICATE
+(defn aplica-desconto?
+  [valor-bruto]
+  (if (> valor-bruto 100)
+    true))
+(println (aplica-desconto? 1000))
+(println (aplica-desconto? 100))
+COPIAR CÓDIGO
+Ao executarmos o código dessa forma, receberemos true e nil. Vamos verificar se a função (valor-descontado) continua funcionando dessa forma. Antes disso, para garantirmos que a redefinição de (aplica-desconto?) está sendo chamada, adicionaremos um (println) com a mensagem "chamando a versão redefinida".
+
+
+; PREDICATE
+(defn aplica-desconto?
+  [valor-bruto]
+  (println "chamando a versão redefinida")
+  (if (> valor-bruto 100)
+    true))
+(println (aplica-desconto? 1000))
+(println (aplica-desconto? 100))
+
+(println (valor-descontado 1000))
+(println (valor-descontado 100))COPIAR CÓDIGO
+Executando o código, as últimas chamadas no console serão:
+
+chamando a versão redefinida
+true
+
+chamando a versão redefinida
+
+nil
+
+chamando a versão redefinida
+
+900N
+
+chamando a versão redefinida
+
+100
+
+Ou seja, nossa função está sendo chamada corretamente. Isso acontece pois, por mais que (valor-descontado) tenha sido definida anteriormente, a chamada de (aplica-desconto?) é feita em tempo de execução, e não em tempo de compilação do código.
+
+Continuando, utilizar somente o (if), sem um else, é tão comum que existe o operador when, que devolve somente o caso verdadeiro.
+
+; PREDICATE
+(defn aplica-desconto?
+  [valor-bruto]
+  (println "chamando a versão redefinida")
+  (when (> valor-bruto 100)
+    true))
+(println (aplica-desconto? 1000))
+(println (aplica-desconto? 100))
+
+(println (valor-descontado 1000))
+(println (valor-descontado 100))COPIAR CÓDIGO
+È uma outra maneira de construirmos o código, que funciona exatamente da mesma maneira. Mas se somente estamos devolvendo true ou false na verificação (> valor-bruto 100), por que não simplesmente chamamos essa verificação?
+
+; PREDICATE
+(defn aplica-desconto?
+  [valor-bruto]
+  (println "chamando a versão redefinida")
+  (> valor-bruto 100))
+
+(println (aplica-desconto? 1000))
+(println (aplica-desconto? 100))
+
+(println (valor-descontado 1000))
+(println (valor-descontado 100))COPIAR CÓDIGO
+Assim, de maneira mais econômica e direta, executaremos tudo o que gostaríamos. Para limparmos ainda mais o código, removeremos o (println).
+
+; PREDICATE
+(defn aplica-desconto?
+  [valor-bruto]
+  (> valor-bruto 100))COPIAR CÓDIGO
+É importante citar que o modo de edição automática dos parênteses que o IntelliJ nos proporciona às vezes pode atrapalhar. Por exemplo, no seguinte cenário esquecemos de fechar o primeiro parênteses:
+
+; PREDICATE
+(defn aplica-desconto?
+  [valor-bruto]
+  (> valor-bruto 100)COPIAR CÓDIGO
+Se tentarmos colocar o parênteses ao final, não funcionará. Isso porque, nesse modo de edição automática, não conseguimos fechar ou apagar os parênteses. Para solucionar eventuais prolemas com parênteses, uma "gambiarra" do nosso instrutor é copiar um parênteses fechado e colá-lo em seguida, já que o "paste" (colar ou "Ctrl + V") não é bloqueado. Da mesma forma, o "cut" (recortar, cujo atalho é "Command + X") também pode ser utilizado.
+
+Agora imagine que o código ficou desalinhado, como no exemplo:
+
+; PREDICATE
+(defn aplica-desconto?
+            [valor-bruto]
+      (> valor-bruto 100))COPIAR CÓDIGO
+Nessas situações, podemos clicar em "Code > Reformat Code" (atalho "Command + Alt + L") para que o código seja alinhado automaticamente.
+
+@@04
+Funções como parâmetros, funções anonimas e lambdas
+
+Até agora nós compomos o comportamento da aplicação com uma função invocando a outra, e a busca de uma função por outra, o que chamamos de "lookup", é feito em tempo de execução. Porém, a chamada da função (aplica-desconto?) ocorre diretamente do código de (valor-descontado).
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se o valor bruto for estritamente maior que 100."
+  [valor-bruto]
+  (if (aplica? valor-bruto)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto         (* valor-bruto taxa-de-desconto)]
+      (- valor-bruto desconto))
+    valor-bruto))
+
+(println (valor-descontado 1000))
+(println (valor-descontado 100))
+
+; PREDICATE
+(defn aplica-desconto?
+  [valor-bruto]
+  (> valor-bruto 100))
+
+(println (aplica-desconto? 1000))
+(println (aplica-desconto? 100))COPIAR CÓDIGO
+Uma outra grande sacada da programação funcional, algo que encontramos no Clojure e também em outras linguagens, é trabalharmos com funções como se elas fossem "coisas". Ou seja, valor-descontado é um símbolo, ou uma "coisa", que referencia uma função e que pode ser passado para frente. Inclusive, podemos tentar fazer isso.
+
+A função (aplica-desconto?), por exemplo, poderia se chamar (mais-caro-que-100?). Então, poderíamos ter uma função (valor-descontado) que, ao invés de receber somente o valor-bruto, só aplicaria esse desconto caso uma condição fosse verdadeira. Nesse caso, teríamos uma função aplica?.
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se o valor bruto for estritamente maior que 100."
+  [aplica? valor-bruto]
+  (if (aplica-desconto? valor-bruto)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto         (* valor-bruto taxa-de-desconto)]
+      (- valor-bruto desconto))
+    valor-bruto))COPIAR CÓDIGO
+Repare que o parâmetro (aplica?) será realçado em cinza, assim como (mais-caro-que-100?), indicando que eles não estão sendo utilizados. Chamaremos a função aplica? no nosso (if). A lógica da função (valor-descontado) então mudará para "Retorna o valor com desconto de 10% se deve aplicar desconto.", e definiremos se o desconto deverá ser aplicado chamando a função (aplica?).
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se deve aplicar desconto."
+  [aplica? valor-bruto]
+  (if (aplica? valor-bruto)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto         (* valor-bruto taxa-de-desconto)]
+      (- valor-bruto desconto))
+    valor-bruto))
+
+(println (valor-descontado 1000))
+(println (valor-descontado 100))COPIAR CÓDIGO
+Agora, (valor-descontado) precisará receber dois parâmetros, e acima estamos passando somente um. Corrigiremos isso passando a função mais-caro-que-100? como primeiro parâmetro. Assim, invocaremos o (valor-descontado) passando como parâmetro um símbolo que referencia uma função.
+
+Para testarmos isso, antes da execução, adicionaremos um (println) em (mais-caro-que-100?) com a mensagem "deixando claro invocação de mais-caro-que-100?". Também faremos outro (println), dessa vez em (valor-descontado), logo antes de chamarmos essa função, com a mensagem "função como parâmetro".
+
+(defn mais-caro-que-100?
+  [valor-bruto]
+  (println "deixando claro invocação de mais-caro-que-100?")
+  (> valor-bruto 100))
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se deve aplicar desconto."
+  [aplica? valor-bruto]
+  (if (aplica? valor-bruto)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto         (* valor-bruto taxa-de-desconto)]
+      (- valor-bruto desconto))
+    valor-bruto))
+
+(println "função como parâmetro")
+(println (valor-descontado mais-caro-que-100? 1000))
+(println (valor-descontado mais-caro-que-100? 100))COPIAR CÓDIGO
+Ao executarmos, as últimas saídas no console serão:
+
+função como parâmetro
+deixando claro invocação de mais-caro-que-100?
+
+900N
+
+deixando claro invocação de mais-caro-que-100?
+
+100
+
+Assim, aprendemos que funções podem funcionar da mesma forma que um número ou uma string, e que podemos invocá-las utilizando símbolos como referências. A abstração de uma função, que é o que fizemos agora, pode ser feita em várias linguagens. Em C#, por exemplo, temos situações análogas quando passamos um ponteiro para uma função, e em Java podemos passar referências de funções, como métodos estáticos ou métodos de objeto específicos.
+
+Por isso, a definição de uma linguagem funcional costuma abranger mais conceitos do que simplesmente trabalhar com "Higher Order Functions", o tipo de funções que acabamos de aprender. Um desses conceitos é a imutabilidade, que trabalhamos nos nossos vetores e que veremos mais no futuro.
+
+Ainda sobre as funções, repare que (mais-caro-que-100?) é uma função bastante simples, e inclusive é possível encontrá-la escrita da seguinte forma:
+
+(defn mais-caro-que-100?  [valor-bruto]  (> valor-bruto 100))COPIAR CÓDIGO
+Já que ela é tão simples, podemos imaginar que talvez ela seja utilizada uma única vez. Sendo assim, ao invés de criarmos a função e passá-la como parâmetro, será que poderíamos simplesmente chamar uma função sem nome, ou seja, uma função anônima? Isso é possível, por exemplo, por meio da construção (fn [valor-bruto] (> valor-bruto 100)).
+
+(println "função sem nome")
+(fn [valor-bruto] (> valor-bruto 100))
+(println (valor-descontado mais-caro-que-100? 1000))
+(println (valor-descontado mais-caro-que-100? 100))COPIAR CÓDIGO
+Repare que estamos fazendo exatamente a mesma coisa que em (mais-caro-que-100?), mas dessa vez utilizando (fn) para definirmos uma função sem darmos um símbolo a ela, e simplesmente passando os parâmetros em seguida. Para testarmos, vamos passá-la diretamente como um dos parâmetros das nossas chamadas de (valor-descontado).
+
+(println "função sem nome")
+
+(println (valor-descontado (fn [valor-bruto] (> valor-bruto 100)) 1000))
+(println (valor-descontado (fn [valor-bruto] (> valor-bruto 100)) 100))COPIAR CÓDIGO
+Executando o código, as últimas saídas no console serão:
+
+função sem nome
+900N
+
+100
+
+Funções anônimas (também chamadas de "funções lambda"), além de classes anônimas e outras "coisas" anônimas, podem ser encontradas tanto em Clojure quanto em outras linguagens. Uma das vantagens da construção acima, utilizando somente uma linha, é ser bastante curta. Porém, em contrapartida, estamos compondo com mais complexidade, dificultando a manutenção do código.
+
+Entretanto, é possível nos depararmos com formas ainda mais curtas desse tipo de código. Por exemplo, o parâmetro valor-bruto poderia ser simplesmente chamado de v:
+
+(println (valor-descontado (fn [v] (> v 100)) 1000))
+(println (valor-descontado (fn [v] (> v 100)) 100))COPIAR CÓDIGO
+Esse tipo de construção com funções anônimas não parece ideal, pois os argumentos e símbolos estão sendo cada vez mais abreviados para caberem em uma linha. Pode parecer legível em número de caracteres, mas não é em compreensão. Quer ver um exemplo ainda mais radical? Que tal, já que só temos um argumento, não declararmos esses argumentos e nem mesmo a função que queremos executar?
+
+(println (valor-descontado #(> %1 100) 1000))
+(println (valor-descontado #(> %1 100) 100))COPIAR CÓDIGO
+Dessa forma, estamos utilizando a cerquilha (#) para definir a função e utilizando o primeiro argumento (%1) para executá-la. Se a função recebesse dois argumentos, usaríamos %1 e %2, e assim por diante. Executando esse código teremos o mesmo resultado encontrado anteriormente.
+
+Mas não acabou! Se a função só recebe um argumento, podemos simplesmente passar o %.
+
+(println (valor-descontado #(> % 100) 1000))
+(println (valor-descontado #(> % 100) 100))COPIAR CÓDIGO
+O resultado, como esperado, continuará o mesmo. A vantagem dessa sequência lógica é ter cada vez menos caracteres, mas a leitura é cada vez mais complexa e ambígua. Esse é um exemplo simples no qual temos somente uma comparação, mas podem existir funções lambda muito mais complexas.
+
+Um possível "meio termo" seria a construção a seguir:
+
+(def mais-caro-que-100?  (fn [valor-bruto] (> valor-bruto 100)))COPIAR CÓDIGO
+Nela, estamos utilizando o def para definirmos o símbolo mais-caro-que-100? como a função que é executada em seguida. Poderíamos construir a mesma lógica da seguinte forma:
+
+(def mais-caro-que-100?  #(> % 100))COPIAR CÓDIGO
+Da mesma maneira, estamos definindo o símbolo mais-caro-que-100? como a função que é criada. Dessa forma, pelo menos teríamos um nome (ou símbolo) para a função lambda, e poderíamos chamá-la utilizando sua referência.
+
+(def mais-caro-que-100?  #(> % 100))
+(println (valor-descontado mais-caro-que-100? 1000))COPIAR CÓDIGO
+Essas são várias maneiras de executarmos o mesmo código, todas elas possíveis devido às Higher Order Functions. Essas, sendo trabalhadas como "coisas", podem nos trazer vantagens e desvantagens.
+
+@@05
+Faça como eu fiz na aula
+
+Chegou a hora de você seguir todos os passos realizados por mim durantes esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito. Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
+
+O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha certeza de que tudo está certo antes de continuar. Ficou com dúvida? Podemos te ajudar pelo nosso fórum.
+
+@@06
+Para saber mais
+
+O Cursive possui dezenas de atalhos que nos ajudam no dia a dia. O guia de usuário deles possui diversas páginas que sugiro ler de vez em quando. Não precisa ler tudo de uma vez só. Uma vez por semana olha uma página nova de atalhos para você tentar incorporar ao seu dia a dia. Lembre-se que no dia a dia gastamos mais tempo pensando e elaborando o que fazer do que digitando, não estamos numa competição de digitação, mas provavelmente queremos produzir código bom que seja de manutenção boa a médio prazo. https://cursive-ide.com/userguide
+Lembre-se que atalhos fundamentais serão o de reload: Command Shift L e de execução da linha base em que você está trabalhando Command Shift P.
+
+https://cursive-ide.com/userguide
+
+@@07
+Para saber mais
+
+Para explorar alguma coisa parece ser útil escrever código dentro de seu core, mas na prática como o comando lein run carrega e roda o seu código do core, não é interessante deixar código de teste ou exploração voando. Nossos cursos de testes ensinam onde colocamos testes automatizados e é comum explorarmos através do REPL. Pessoalmente, por vezes, gosto de explorar dentro de um arquivo qualquer onde escrevo código temporário, mas sempre antes de gerar uma aplicação final esse código de exploração é jogado fora.
+
+@@08
+Para saber mais
+
+Funções são "coisas" é a maneira informal de dizer que aqui em Clojure funções são tratadas como algo muito importante, tão importantes quanto dados. Isto é, você pode trabalhar com símbolos que referenciam funções. Funções são "first class citizens". Inclusive você pode passá-las como argumento para outras funções, ou recebê-las como retorno de funções. Funções que recebem ou retornam funções são chamadas de "higher order functions".
+
+@@09
+Predicados
+
+Qual função verifica se o valor é estritamente positivo?
+
+(defn estritamente-positivo? [x] (> x 0))
+ 
+Essa função recebe x e verifica se ele é estritamente positivo
+Alternativa correta
+(defn estritamente-positivo? % > 0)
+ 
+Alternativa correta
+(defn estritamente-positivo? [x] (x > 0))
+ 
+Alternativa correta
+(defn estritamente-positivo? [x] > 0)
+
+@@10
+O que aprendemos?
+
+O que aprendemos nesta aula:
+Utilizar o plugin Cursive;
+O que é o namespace;
+Atalhos do Intellij;
+Utilizar o ; para comentar a linha;
+O que são predicates;
+Fazer uma função chamar a outra;
+Criar uma função anônima;
+Utilizar % para fazer um função lambda.
