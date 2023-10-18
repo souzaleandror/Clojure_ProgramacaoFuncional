@@ -957,3 +957,324 @@ O que são predicates;
 Fazer uma função chamar a outra;
 Criar uma função anônima;
 Utilizar % para fazer um função lambda.
+
+#### 18/10/2023
+
+@04-Primeiros passos com colecoes
+
+@@01
+Projeto da aula anterior
+
+Caso queira, você pode baixar o projeto do curso no ponto em que paramos na aula anterior.
+
+https://github.com/alura-cursos/clojure-introducao/archive/aula3.zip
+
+@@02
+Vetores, get e updates
+
+Continuando com o nosso recurso, repare que o IntelliJ, em algum momento, pode exibir notificações de eventos, como ter encontrado um repositório que ainda não foi indexado. Nesses casos, podemos simplesmente esconder os eventos. Para prosseguirmos, criaremos um novo arquivo aula4.clj no qual definiremos o namespace curso.aula4. Lembrando que se quisermos utilizar esse arquivo no REPL, precisamos chamar (use 'curso.aula4) para fazermos com que ele seja capaz de encontrar símbolos nesse namespace.
+Nessa aula voltaremos a trabalhar com vetores. Começaremos definindo os precos de três produtos que possuímos.
+
+(ns curso.aula4)
+
+(def precos [30 700 1000])COPIAR CÓDIGO
+Pressionando "Command + Shift + L" ("Alt + Shift + L" no Windows) nós carregaremos esse arquivo no REPL. Como utilizamos o namespace desse arquivo, conseguiremos imprimir o vetor precos corretamente. Repare que sempre preferiremos criar nossos códigos dentro do arquivo, ao invés de no REPL, para mantermos um histórico.
+
+Talvez você se lembre de que podemos utilizar um vetor como se fosse uma função. Dessa forma, se executarmos (println (precos 0)), conseguiremos o valor da primeira posição nesse vetor - no caso, 30.
+
+(def precos [30 700 1000])
+
+(println (precos 0))COPIAR CÓDIGO
+Também existe uma função chamada (get) que recebe uma coleção, nesse caso um vetor precos, e o índice que queremos buscar.
+
+(def precos [30 700 1000])
+
+(println (precos 0))
+(println (get precos 0))COPIAR CÓDIGO
+Assim como na execução anterior, conseguiremos como retorno o 30. Se pedirmos o índice 3, o retorno será 1000. Já se tentarmos um índice ao qual não temos excesso, por exemplo 17, utilizando o vetor como uma função, receberemos um erro padrão IndexOutOfBoundsException do Java. Porém, o (get) nos retornará nil.
+
+Isso acontece pois o retorno vai depender da função que estivermos utilizando, ou seja, uma coisa é utilizarmos o vetor como função para acessar diretamente a posição 17 e retornar um valor, e outra é utilizarmos a função (get), que já possui um tratamento para valores que estão fora daquele escopo.
+
+A função (get) também nos permite definir um valor padrão para ser devolvido caso aquele índice não exista, por exemplo 0:
+
+(def precos [30 700 1000])
+
+(println (precos 0))
+(println (get precos 0))
+(println (get precos 2))
+; (println (precos 17))
+(println "valor padrão nil" (get precos 17))
+(println "valor padrão 0" (get precos 17 0))COPIAR CÓDIGO
+Ainda que tenhamos um valor padrão, se passarmos um índice existente, o retorno será o valor atribuído a aquele índice. Assim, aprendemos que é possível trabalhar com vetores de maneiras diferentes. Quando queremos evitar exceptions, por exemplo, podemos utilizar o get().
+
+Anteriormente, também aprendemos a utilizar o (conj), que adiciona um novo elemento ao final do vetor sem realmente atualizá-lo, afinal o vetor é imutável.
+
+(print (conj precos 5))
+(print precos)COPIAR CÓDIGO
+[30 700 1000 5]
+[30 700 1000]
+
+Ao utilizarmos o (conj), devemos tomar cuidado com a ordem dos parâmetros: o vetor (ou coleção) deverá vir primeiro, do contrário teremos um erro. Observe:
+
+(print (conj 5 precos))COPIAR CÓDIGO
+Syntax error (ClassCastException) compiling at (aula4.clj:15:1). java.base/java.lang.Long cannot be cast to clojure.lang.IPersistentCollection
+Repare que a interface de coleção do Clojure é chamada de "Persistent", no sentido de que ela persiste da maneira que está - ou seja, se refere à imutabilidade que já comentamos. Antes de continuarmos, podemos comentar essa última linha de código com o atalho "Command + /" ("Ctrl + /").
+
+Que outros tipos de operações podemos fazer com conjuntos? Podemos, por exemplo, atualizar um elemento dentro do vetor. Imagine que queremos realizar uma soma. Para somarmos 1, por exemplo, podemos utilizar (+ 5 1), correto? Mas existe também outra forma de somarmos 1, ou seja, incrementarmos um valor, que é utilizando a função (inc).
+
+(println (+ 5 1))
+(print (inc 5))COPIAR CÓDIGO
+6
+6
+
+Como visto, a função (inc) recebe um argumento e soma 1. Agora queremos atualizar o vetor precos chamando a função (inc) para a sua posição 0. Isso pode ser feito utilizando a função (update), que aplica uma função a um vetor no índice passado como parâmetro.
+
+(println (update precos 0 inc))COPIAR CÓDIGO
+Executando esse código, nosso retorno será o novo vetor atualizado:
+
+[31 700 1000]
+Porém, devemos nos lembrar de que nada altera o vetor original, pois nossas coleções são persistentes/imutáveis. Podemos confirmar isso chamando também (update precos 0 dec), que chamará a função (dec) para decrementar em 1 o valor original.
+
+(println (update precos 0 inc))
+(println (update precos 1 dec))COPIAR CÓDIGO
+[31 700 1000]
+[30 699 1000]
+
+Como visto, as duas funções funções são executadas sobre o vetor precos original, de modo que o valor do índice 0 volta a ser 30 no retorno da segunda chamada.
+
+Para vermos essa execução acontecendo na prática, usaremos o (defn) para criarmos a nossa própria função soma-1. Ela receberá como parâmetro um valor e executará (+ valor 1), além de fazer um (println) da mensagem "estou somando um em" seguida do valor.
+
+Em seguida, chamaremos a função (update) passando a posição 0 do nosso vetor precos e a função soma-1 que acabamos de criar.
+
+(defn soma-1
+  [valor]
+  (println "estou somando um em" valor)
+  (+ valor 1))
+
+(println (update precos 0 soma-1))COPIAR CÓDIGO
+estou somando um em 30
+[31 700 1000]
+
+Como é possível notar, a função foi aplicada corretamente sobre o valor 30 e retornou um conjunto atualizado contendo [31 700 100]. Se quisermos, podemos repetir o processo com qualquer valor, por exemplo 3:
+
+(defn soma-3
+  [valor]
+  (println "estou somando 3 em" valor)
+  (+ valor 3))
+
+(println (update precos 0 soma-3))COPIAR CÓDIGO
+estou somando 3 em 30
+[33 700 1000]
+
+No próximo vídeo aplicaremos os conteúdos que vimos na aula 3 ao nosso conjunto de preços.
+
+@@03
+Map e filter
+
+Para continuarmos nossos estudos, vamos pegar as definições de (aplica-desconto) e (valor-descontado) que fizemos anteriormente - nesse caso, versões mais antigas e mais simples, nas quais não estamos utilizando funções como argumentos.
+; CODIGO DA AULA ANTERIOR
+
+(defn aplica-desconto?
+  [valor-bruto]
+  (> valor-bruto 100))
+
+(defn valor-descontado
+  "Retorna o valor com desconto de 10% se o valor bruto for estritamente maior que 100."
+  [valor-bruto]
+  (if (aplica-desconto? valor-bruto)
+    (let [taxa-de-desconto (/ 10 100)
+          desconto         (* valor-bruto taxa-de-desconto)]
+      (- valor-bruto desconto))
+    valor-bruto))COPIAR CÓDIGO
+Agora queremos aplicar a função (valor-descontado) para todos os preços. Para isso, em linguagens imperativas, costumamos criar um laço for de maneira bastante explícita, iterando pelos valores do conjunto, como em (for preco in precos). Esse é um ponto importante: pessoalmente, ao invés de discutir a diferença entre uma linguagem imperativa e declarativa, considero mais propício discutir a diferença entre a maneira implícita e a explícita. Isso porque a complexidade de um laço continua no código, e precisamos compreendê-la.
+
+A maneira mais comum de aplicarmos uma função a todos os itens de um conjunto é utilizando a função (map). Nesse caso, iremos mapear a função (valor-descontado) para cada um dos precos.
+
+(println "map" (map valor-descontado precos))COPIAR CÓDIGO
+Por trás dos panos, de alguma forma - que por enquanto não importa -, iremos passar por todos os elementos de precos chamando o (valor-descontado). Como resultado, teremos:
+
+(30 630N 900N)
+Em 30 o desconto não foi aplicado, pois esse valor é menor do que 100. Já em 630N e 900N, o desconto foi aplicado corretamente. Assim, percebemos que a função (map) é bastante prática, executando valor-descontado (preco) para cada um dos elementos, de maneira análoga a uma função matemática (f (x)).
+
+O (map) é bastante útil e muito utilizado, em geral em momentos nos quais queremos fazer um laço passando por todos os elementos e aplicando uma função. Claro, nem sempre o objetivo será executar somente o (map). E se quisermos, por exemplo, saber quais são os valores do vetor original precos aos quais devemos aplicar o desconto, filtrando-os?
+
+Para pensarmos nesse problema, vamos executar a função (range) que devolve, de alguma forma, os valores de 0 até o valor passado como parâmetro, excluindo-o. Ou seja, (range 10) retornará os valores de 0 até 9.
+
+Já para filtrarmos valores, podemos utilizar a função (filter), que, assim como (map), recebe como segundo parâmetro o vetor ou a sequência de valores em que será aplicada. Já o primeiro parâmetro é a função de filtragem a ser utilizada. Nesse exemplo, usaremos a função even? ("par?"), que recebe um parâmetro "n" e retorna os valores pares.
+
+(println (range 10))
+(println (filter even? (range 10)))COPIAR CÓDIGO
+Como retorno desse código, teremos:
+
+(0 1 2 3 4 5 6 7 8 9)
+(0 2 4 6 8)
+
+Ou seja, ao aplicarmos o filtro, passamos por cada elemento do conjunto (range 10) chamando a função even?. Se o valor devolvido por essa função é verdadeiro, ele é mantido; do contrário (se for nulo ou falso), ele é descartado. É isso que queremos fazer, filtrando os precos por meio de uma função que devolverá verdadeiro caso o desconto deva ser aplicado, e algo equivalente a falso caso não deva. Na verdade já temos essa função, que é (aplica-desconto?). Para testarmos, imprimiremos novamente nosso vetor original antes da execução do filtro.
+
+(println "vetor" precos)
+(println "filter" (filter aplica-desconto? precos))COPIAR CÓDIGO
+Como retorno, teremos:
+
+vetor [30 700 1000]
+filter (700 1000)
+
+Dessa forma, após a aplicação do filtro, o valor 30 foi descartado, afinal o retorno da função (aplica-desconto?) foi false. Poderíamos ainda aplicar o mapa após esse filtro, mostrando somente os valores com desconto dos produtos em que tal desconto foi aplicado.
+
+(println "map após o filter" (map valor-descontado (filter aplica-desconto? precos)))COPIAR CÓDIGO
+map após o filter (630N 900N)
+Assim, estamos compondo por meio das funções (filter) e (map) uma lógica parecida com a que faríamos usando um laço for, algo muito comum no dia-a-dia.
+
+@@04
+Reduce e variações
+
+Por fim, gostaríamos de apresentar uma terceira função que, junto com a (map) e a (filter), também é muito utilizada no dia-a-dia. Dado que o (map) pega uma sequência de elementos, por exemplo um vetor, e aplica uma função para cada um desses elementos, é possível transformar uma sequência em outra sequência. O (filter) pega uma sequência de elementos e aplica uma função para cada um deles, diminuindo o tamanho da sequência. Porém, no (filter) e no (map) não é possível fazer operações com mais de um elemento ao mesmo tempo (talvez por meio de alguma "gambiarra", mas é difícil).
+Por exemplo, o (filter) consegue aplicar uma função para o primeiro, o segundo e o terceiro valor do conjunto precos, mas não consegue somar esses valores entre si. Mas e se quisermos fazer isso, obtendo o total dos nossos precos, ou mesmo a média entre eles?
+
+A ideia é pegarmos uma sequência de elementos e reduzirmos o seu tamanho para um determinado número, como 1. A função que nos permite fazer isso se chama (reduce). Como de costume, ela recebe como segundo parâmetro a sequência (ou os valores) que queremos reduzir, e como primeiro parâmetro uma função que desejamos aplicar. Em nosso teste, usaremos a função de soma, +.
+
+(println "vetor" precos)
+(println (reduce + precos))COPIAR CÓDIGO
+vetor [30 700 1000]
+1730
+
+Assim, conseguimos obter a soma total de todos os valores desse conjunto. Para isso, a função (reduce), de alguma maneira, aplica a função + aos elementos do vetor. Mas como? Vamos testar isso criando nossa própria função de soma, chamada (minha-soma). Essa função receberá como parâmetros dois valores, valor-1 e valor-2, imprimirá na tela a mensagem "somando" seguida desses valores e, por fim, executará a soma propriamente dita ((+ valor-1 valor-2)).
+
+Em seguida, chamaremos a função (reduce) passando como parâmetros nosso conjunto precos e nossa função (minha-soma).
+
+(defn minha-soma
+  [valor-1 valor-2]
+  (println "somando" valor-1 valor-2)
+  (+ valor-1 valor-2))
+
+(println (reduce minha-soma precos))COPIAR CÓDIGO
+Executando esse código, as últimas saídas no console serão:
+
+somando 30 700
+somando 730 1000
+
+1730
+
+Ou seja, o (reduce) pegou os dois primeiros valores do vetor precos e chamou a função (minha-soma). Em seguida, pegou o resultado dessa função e chamo novamente minha-soma com o próximo valor. Se tivéssemos um vetor com mais elementos, esse procedimento continuaria a ser repetido. Para testarmos, chamaremos novamente o (reduce), dessa vez utilizando como conjunto o (range 10).
+
+(println (reduce minha-soma (range 10)))COPIAR CÓDIGO
+somando 0 1
+somando 1 2
+
+somando 3 3
+
+somando 6 4
+
+somando 10 5
+
+somando 15 6
+
+somando 21 7
+
+somando 28 8
+
+somando 36 9
+
+45
+
+E se passarmos um vetor contendo um único elemento? Vamos testar:
+
+(println (reduce minha-soma [15]))COPIAR CÓDIGO
+15
+Nesse caso, a devolução é somente 15, sem que a função minha-soma sequer seja chamada. A função (reduce) também pode ser chamada com um parâmetro extra, que é o valor inicial. Como exemplo, passaremos o valor 0:
+
+(println (reduce minha-soma 0 precos))COPIAR CÓDIGO
+somando 0 30
+somando 30 700
+
+somando 730 1000
+
+30
+
+Repare que, dessa vez, o valor que passamos como parâmetro foi utilizado na primeira chamada de minha-soma, e a execução então seguiu com os outros elementos do conjunto. A mesma coisa acontece se chamarmos (println (reduce minha-soma 0 (range 10))):
+
+somando 0 0
+somando 0 1
+
+somando 1 2
+
+somando 3 3
+
+somando 6 4
+
+somando 10 5
+
+somando 15 6
+
+somando 21 7
+
+somando 28 8
+
+somando 36 9
+
+45
+
+E também se chamarmos (println (reduce minha-soma 0 [15])):
+
+somando 0 15 15
+E se passarmos um vetor sem nenhum elemento?
+
+(println (reduce minha-soma 0 []))COPIAR CÓDIGO
+Nesse caso, a devolução é somente o elemento inicial:
+
+0
+Já se tivermos uma sequência vazia e nenhum elemento inicial, teremos uma ArityException, já que não teremos passado o número adequado de parâmetros para a função.
+
+(println (reduce minha-soma []))COPIAR CÓDIGO
+Syntax error (ArityException) compiling at (aula4.clj:81:1). Wrong number of args (0) passed to: curso.aula4/minha-soma
+O mesmo erro acontece se tentarmos passar como parâmetro um vetor que definimos como vazio:
+
+(def vazio [])
+(println (reduce minha-soma vazio))COPIAR CÓDIGO
+Nesse caso, poderia ter sido definido que a sintaxe deveria ser suportada, devolvendo nulo, mas não é isso que acontece. Ou seja, é necessário passar pelo menos um valor para que o (reduce) funcione.
+
+Com isso, aprendemos uma trinca de funções bastantes úteis para trabalharmos com coleções no nosso dia-a-dia: (map), (filter) e (reduce). Na documentação do Clojure é possível encontrar diversas outras funções e suas respectivas definições. Também podemos encontrar tais definições diretamente no código fonte em nossa IDE, segurando "Command" ou "Ctrl" e clicando na função para acessá-lo.
+
+https://clojure.github.io/clojure/clojure.core-api.html
+
+@@05
+Faça como eu fiz na aula
+
+Chegou a hora de você seguir todos os passos realizados por mim durantes esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito. Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
+
+
+O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha certeza de que tudo está certo antes de continuar. Ficou com dúvida? Podemos te ajudar pelo nosso fórum.
+
+@@06
+Para saber mais
+
+É comum ver a apresentação de linguagens funcionais através das analogias e das ideias de funções matemáticas, com exemplos matemáticos. Nossa abordagem não é essa pois a maior parte das aplicações que você vai criar em Clojure serão com domínios do dia a dia, hospitais, bancos, ecommerces, lojas etc. Claro, a ideia matemática de uma função pura é muito importante e será tema recorrente dos cursos, cada vez nos mostrando um pouco mais dos ganhos que temos uma vez que as definições de símbolos serem a valores imutáveis em seus contextos, e funções que não causam efeitos colaterais em todo nosso sistema.
+
+@@07
+Erros
+
+Como em qualquer linguagem de programação, um erro comum é como lidamos com... erros. Qual a forma mais segura de acessar a quinta posição de um vetor em Clojure?
+
+(defn quinto-elemento [v] (v 5))
+ 
+Alternativa correta
+(defn quinto-elemento [v] (v 4))
+ 
+Alternativa correta
+(defn quinto-elemento [v] (get v 5))
+ 
+Alternativa correta
+(defn quinto-elemento [v] (get v 4))
+ 
+Se v for nulo, teremos nulo. Se não existir tal elemento, teremos nulo. Caso contrário teremos o quinto elemento.
+
+@@08
+O que aprendemos?
+
+O que aprendemos nesta aula:
+Utilizar o get para evitar exceções;
+Definir o valor padrão de retorno do get;
+Utilizar a função inc para somar o número atual mais um;
+Utilizar a função update para apenas retornar um vetor com um valor alterado;
+Utilizar a função map para passar por todos os elementos;
+Utilizar a função filter para fazer a filtragem de elementos;
+Utilizar a função reduce para reduzir valores.
