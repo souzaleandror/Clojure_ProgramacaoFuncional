@@ -1278,3 +1278,241 @@ Utilizar a função update para apenas retornar um vetor com um valor alterado;
 Utilizar a função map para passar por todos os elementos;
 Utilizar a função filter para fazer a filtragem de elementos;
 Utilizar a função reduce para reduzir valores.
+
+#### 19/10/2023
+
+@05-Conhecendo mapas e threading
+
+@@01
+Projeto da aula anterior
+PRÓXIMA ATIVIDADE
+
+Caso queira, você pode baixar o projeto do curso no ponto em que paramos na aula anterior.
+
+https://github.com/alura-cursos/clojure-introducao/archive/aula4.zip
+
+@@02
+Mapas, vals e keys
+
+Já aprendemos a trabalhar com os tipos escalares, como inteiros, strings e doubles, além de BigInts e BigDecimals, e vimos que, na documentação do Clojure, existem várias funções que nos permitem trabalhar com coleções/vetores. Também aprendemos que as sequências que estamos passando entre parênteses são, na verdade, listas, um outro tipo de coleção que pode ser trabalhada em Clojure.
+Além dos vetores, existe um outro tipo de coleção, na qual associamos um valor a outro. Por exemplo, imagine que queremos comprar 10 mochilas e 5 camisetas. Dessa forma, queremos conectar os valores 10 e mochilas, e 5 e camisetas, em uma espécie de coleção associativa cuja implementação comum costuma ser um hashmap.
+
+Para trabalharmos com esse tipo de mapa, criaremos um novo arquivo aula5.clj com o namespace curso.aula5. Nele, definiremos um estoque que consistirá em um mapa, cuja implementação no Clojure é feita com {}. Nesse mapa teremos os elementos "Mochila" 10 e "Camiseta" 5. Por fim, faremos um (println) do nosso estoque.
+
+(ns curso.aula5)
+
+(def estoque {"Mochila" 10 "Camiseta" 5})
+(println estoque)COPIAR CÓDIGO
+Executando esse códig,o teremos como saída:
+
+{Mochila 10, Camiseta 5}
+Repare que essa sintaxe é muito parecida com a de um vetor, com a diferença de que o primeiro valor está atrelado ao segundo, o terceiro ao quarto e assim por diante. Com quatro elementos é fácil entendermos o que está acontecendo no código, mas imagine que tenhamos uma lista com dezenas de valores? Nesse sentido, é uma questão de boa prática adicionarmos vírgulas entre os pares, ou mesmo pularmos linhas.
+
+(def estoque {"Mochila" 10 "Camiseta" 5})
+
+(println estoque)
+
+(def estoque {"Mochila" 10, "Camiseta" 5})
+(def estoque {"Mochila" 10
+              "Camiseta" 5})
+
+(println estoque)COPIAR CÓDIGO
+Com qual uma dessas formas, o resultado impresso será sempre o mesmo. Assim como com outras coleções, existem funções que nos permitem trabalhar com esses valores. Por exemplo, podemos utilizar o (count) para recuperarmos o número de elementos no dicionário (outro nome que utilizamos para um mapa) estoque.
+
+(def estoque {"Mochila" 10
+              "Camiseta" 5})
+
+(println estoque)
+
+(println "Temos" (count estoque) "elementos")COPIAR CÓDIGO
+Temos 2 elementos
+Em questões de otimização, dependendo da coleção, a quantidade total de elementos poderá estar separada em outro lugar para não precisar ser calculada toda vez. Também podemos utilizar outras funções, como a (keys), que nos devolve as chaves que a coleção possui.
+
+(println "Chaves são:" (keys estoque))COPIAR CÓDIGO
+Chaves são: (Mochila Camiseta)
+Outra função útil é a (vals), que nos retorna somente os valores da coleção.
+
+(println "Valores são:" (vals estoque))COPIAR CÓDIGO
+Valores são: (10 5)
+Por padrão, não existe garantia da ordem que receberemos esses elementos, e eles estarem na mesma sequência que definimos é apenas coincidência. Essas e outras funções específicas podem ser consultadas na documentação do Clojure, na internet ou mesmo no código fonte.
+
+Por enquanto, estamos trabalhando com strings como chaves de um mapa, o que, ainda que seja possível, não é comum. No dia-a-dia, costumamos trabalhar com :mochila, por exemplo, onde o símbolo : (dois pontos) é utilizado para definir uma palavra-chave (ou "keyword").
+
+(def estoque {:mochila 10
+              :camiseta 5})COPIAR CÓDIGO
+Da mesma maneira que trabalhamos como vetores, é possível manipularmos esses mapas, adicionando, removendo, buscando ou alterando os elementos dentro deles. Não iremos passar por todas essas operações, mas aprenderemos a lidar com as principais, de modo que você estará preparado para explorar a documentação e criar seus próprios códigos em Clojure.
+
+Primeiro, vamos adicionar um valor ao mapa estoque. Para isso, utilizaremos a função (assoc), de "associar", passando como argumento a chave :cadeira e o valor 3.
+
+(println (assoc estoque :cadeira 3))COPIAR CÓDIGO
+Como as coleções são persistentes por padrão, ao imprimirmos o retorno dessa função na tela receberemos um novo mapa contendo, agora, três elementos.
+
+{:mochila 10, :camiseta 5, :cadeira 3}
+Já se imprimirmos novamente o símbolo estoque, receberemos:
+
+{:mochila 10, :camiseta 5}
+Ou seja, ele continua referenciando o mapa original, devido á imutabilidade que já comentamos antes. Poderíamos também sobrescrever um valor pedindo a associação, no estoque, da chave :mochila com o novo valor 1.
+
+(println (assoc estoque :mochila 1))COPIAR CÓDIGO
+{:mochila 1, :camiseta 5}
+A função (assoc) também pode ser utilizada com vetores ou outras coleções, mas devemos nos lembrar de consultar a documentação para entendermos as implicações em cada uma delas. A função (update), que já conhecemos anteriormente quando trabalhamos com vetores, também pode ser utilizada com esse tipo de dicionário. No caso, ela receberá como parâmetros a coleção a ser alterada, o índice que queremos atualizar e a função a ser aplicada, por exemplo o inc (de "increase").
+
+(println (update estoque :mochila inc))COPIAR CÓDIGO
+Com isso, aplicaremos a função inc ao valor que está dentro da chave :mochila, resultando em:
+
+{:mochila 11, :camiseta 5}
+Podemos analisar melhor a execução criando uma função (tira-um) que recebe um valor, imprime na tela a mensagem "tirando um de" seguida do valor recebido e, por fim, executa a subtração de valor por 1. Em seguida, executaremos novamente a função (update), dessa vez passando a recém-criada tira-um como parâmetro.
+
+(defn tira-um
+  [valor]
+  (println "tirando um de" valor)
+  (- valor 1))
+
+(println (update estoque :mochila tira-um))COPIAR CÓDIGO
+tirando um de 10
+{:mochila 9, :camiseta 5}
+
+Podemos inclusive executar uma função lambda que subtrai 3 do valor passado na chave (%).
+
+(println (update estoque :mochila #(- % 3)))COPIAR CÓDIGO
+{:mochila 7, :camiseta 5}
+Por último, também poderíamos remover elementos utilizando a função (dissoc), que irá desassociar do estoque uma chave. Nesse caso, passaremos como parâmetro a chave :mochila, de modo que nosso retorno será somente a chave :camiseta.
+
+(println (dissoc estoque :mochila))COPIAR CÓDIGO
+{:camiseta 5}
+
+@@03
+Mapas aninhados update-in e threading first
+
+Já aprendemos a trabalhar com um mapa simples e direto, que podemos chamar de "profundidade 1", no qual as chaves e os valores estão relacionados de maneira linear. Nesse caso, criaremos um mapa pedido contendo dois elementos, :mochila e :camiseta. Cada um desse elementos será também um mapa contendo as chaves :quantidade e :preco, por exemplo :quantidade 2, :preco 80 (duas mochilas, 80 reais cada uma).
+Por fim, faremos a impressão desse pedido na tela. Para visualizarmos mais facilmente nossos dados, incluiremos um (println "\n\n\n\n"), adicionando algumas linhas em branco no console.
+
+(def pedido {:mochila { :quantidade 2, :preco 80}
+             :camiseta {:quantidade 3, :preco 40}})
+(println "\n\n\n\n")
+(println pedido)COPIAR CÓDIGO
+{:mochila {:quantidade 2, :preco 80}, :camiseta {:quantidade 3, :preco 40}}
+Com a função (assoc), podemos adicionar uma nova chave :chaveiro ao nosso pedido, passando também a chave :quantidade com o valor 1 e preco com o valor 10. Dessa vez, ao invés de simplesmente imprimirmos o retorno na tela, utilizaremos o (def) para redefinirmos o símbolo pedido com os novos valores.
+
+(def pedido (assoc pedido :chaveiro {:quantidade 1, :preco 10}))
+(println pedido)COPIAR CÓDIGO
+{:mochila {:quantidade 2, :preco 80}, :camiseta {:quantidade 3, :preco 40}, :chaveiro {:quantidade 1, :preco 10}}
+Quando estávamos trabalhando com vetores, vimos que era possível acessar valores utilizando esses vetores como se fossem funções. Da mesma forma, podemos utilizar um mapa como função, pedindo um valor em seguida.
+
+(println (pedido :mochila))COPIAR CÓDIGO
+Como retorno, teremos o conteúdo da chave passada por parâmetro.
+
+{:quantidade 2, :preco 80}
+Outra possibilidade para isso é utilizarmos a função (get).
+
+(println (pedido :mochila))
+(println (get pedido :mochila))COPIAR CÓDIGO
+Em ambos os casos, o retorno será o mesmo:
+
+{:quantidade 2, :preco 80}
+{:quantidade 2, :preco 80}
+
+Utilizando a função (get), é possível estabelecermos um valor padrão, como 0 ou um mapa vazio ({}). Se não passarmos um valor padrão, o retorno da chamada para a qual passamos uma chave inexistente será nulo (nil).
+
+(println (get pedido :cadeira))
+(println (get pedido :cadeira 0))
+(println (get pedido :cadeira {}))COPIAR CÓDIGO
+nil
+0
+
+{}
+
+Uma terceira maneira de acessarmos uma chave dentro de um mapa é utilizando a própria chave como função. Isso é possível pois as keywords também implementam a interface IFN.
+
+(println (:mochila pedido))COPIAR CÓDIGO
+{:quantidade 2, :preco 80}
+Se tentarmos chamar como função uma chave que não existe naquele mapa, o retorno será nulo. Da mesma forma que fizemos anteriormente, podemos passar um valor padrão para ser retornado ao invés desse nulo.
+
+(println (:cadeira pedido))
+(println (:cadeira pedido {}))COPIAR CÓDIGO
+nil
+{}
+
+Dentre essas formas, a sintaxe (:mochila pedido), na qual utilizamos a chave como função, é a mais comum. Às vezes o (get) é utilizado para deixar explícito o que está acontecendo no código. Já a sintaxe (pedido :mochila) é bastante rara, já que receberemos uma NullPointerException caso o mapa seja nulo.
+
+Se quisermos recuperar a :quantidade de :mochila no pedido, podemos utilizar a seguinte sintaxe:
+
+(println (:quantidade (:mochila pedido)))COPIAR CÓDIGO
+Dessa forma, invocaremos primeiro (:mochila pedido), recuperando as chaves e valores nesse mapa, e então (:quantidade) para recuperarmos o valor atribuído a essa chave, nesse caso 2.
+
+Até o momento estávamos utilizando o (update) para alterarmos um valor no mapa. Porém, essa função recebia como parâmetros o mapa, a chave e a função a ser aplicada. Dessa forma, o que acontece se fizermos (update pedido :mochila inc)?
+
+(println (update pedido :mochila inc))COPIAR CÓDIGO
+Essa construção não faz sentido, afinal não é possível acrescentarmos 1 à :mochila, que possui :quantidade e :preco. Tanto é que, se executarmos esse código, receremos uma ClassCastException informando que a sintaxe não está adequada. Se quisermos acrescentar 1 à :quantidade, por exemplo, deveremos acessar essa chave dentro da chave :mochila, o que pode ser feito com a função (update-in).
+
+(println (update-in pedido [:mochila :quantidade] inc))COPIAR CÓDIGO
+{:mochila {:quantidade 3, :preco 80}, :camiseta {:quantidade 3, :preco 40}, :chaveiro {:quantidade 1, :preco 10}}
+Além da (update-in), outras funções, como (get-in), nos permitem acessar níveis mais profundos dos nossos mapas.
+
+Existe também outra maneira de navegarmos para dentro de um mapa. Repare nesse encadeamento:
+
+(println (:quantidade (:mochila pedido)))COPIAR CÓDIGO
+Aqui, é como se estivéssemos passando pelo pedido para conseguirmos a :mochila, e então passando pela :mochila para pegarmos a :quantidade. Isto é, estamos executando uma função com o valor de retorno de outra função, e assim sucessivamente. Esse tipo de encadeamento é chamado de "threading", em uma analogia com o passar de um feio pelo tecido utilizando uma agulha.
+
+Para iniciarmos o threading, utilizamos o operador -> passando o primeiro elemento sobre o qual gostaríamos de executar uma função, no caso pedido. Em seguida, passamos a função a ser executada, que será :mochila, e a função a ser executada sobre o resultado dela, ou seja, :quantidade.
+
+(println (-> pedido
+               :mochila
+               :quantidade))COPIAR CÓDIGO
+2
+Pode parecer estranho, mas essa é a maneira tradicional de invocarmos funções em todas as linguagens. Em orientação a objetos, por exemplo, pegaríamos a mochila a partir do pedido e, a partir do resultado dessa função, pediríamos a quantidade.
+
+pedido.get(mochila).get(quantidade)COPIAR CÓDIGO
+Existe um argumento de que a legibilidade no funcional acaba sendo maior. Porém, se a legibilidade do prefix ((:quantidade (:mochila pedido))) fosse maior, não teríamos suporte a à outra forma ((-> pedido :mochila :quantidade)) no Clojure, nem mesmo ela seria a mais utilizada. Isso acontece porque a forma prefix parece ter uma dificuldade inerente de leitura quando trabalhamos com encadeamentos maiores de funções, atrapalhando a manutenção do código a longo prazo.
+
+Como curiosidade, se quiséssemos, também poderíamos encadear a nossa chamada da seguinte forma, executando o (println) ao final:
+
+(-> pedido 
+      :mochila 
+      :quantidade 
+      println)COPIAR CÓDIGO
+O retorno, como esperado, será 2, afinal estamos chamando cada um desses símbolos como função, passando o seu resultado adiante e, por fim, imprimindo-o na tela.
+
+@@04
+Faça como eu fiz na aula
+PRÓXIMA ATIVIDADE
+
+Chegou a hora de você seguir todos os passos realizados por mim durantes esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito. Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
+
+O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha certeza de que tudo está certo antes de continuar. Ficou com dúvida? Podemos te ajudar pelo nosso fórum.
+
+@@05
+Threading simples
+PRÓXIMA ATIVIDADE
+
+Dado o mapa a seguir:
+(def 
+  clientes {
+    :15 {
+      :nome "Guilherme"
+      :certificados ["Clojure" "Java" "Machine Learning"] } })COPIAR CÓDIGO
+Como extrair o total de certificados que o Guilherme tem?
+
+(clientes -> :15 :certificados count)
+ 
+Alternativa correta
+(-> clientes 15 :certificados count)
+ 
+15 é uma keyword, não é um número
+Alternativa correta
+(-> clientes :15 :certificados count)
+ 
+Essa forma busca corretamente o id :15, a chave dos certificados e aplica a função count.
+Alternativa correta
+(clientes -> 15 :certificados count)
+
+@@06
+O que aprendemos?
+PRÓXIMA ATIVIDADE
+
+O que aprendemos nesta aula:
+Utilizar um Map(HashMap);
+Utilizar a função count;
+Utilizar a função keys para devolver as chaves que o map possui;
+Utilizar a função assoc para associar um valor ao map;
+O que é threading.
