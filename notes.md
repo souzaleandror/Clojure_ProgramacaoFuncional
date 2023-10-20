@@ -1285,7 +1285,6 @@ Utilizar a função reduce para reduzir valores.
 
 @@01
 Projeto da aula anterior
-PRÓXIMA ATIVIDADE
 
 Caso queira, você pode baixar o projeto do curso no ponto em que paramos na aula anterior.
 
@@ -1475,7 +1474,6 @@ O retorno, como esperado, será 2, afinal estamos chamando cada um desses símbo
 
 @@04
 Faça como eu fiz na aula
-PRÓXIMA ATIVIDADE
 
 Chegou a hora de você seguir todos os passos realizados por mim durantes esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito. Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
 
@@ -1483,7 +1481,6 @@ O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha cert
 
 @@05
 Threading simples
-PRÓXIMA ATIVIDADE
 
 Dado o mapa a seguir:
 (def 
@@ -1508,7 +1505,6 @@ Alternativa correta
 
 @@06
 O que aprendemos?
-PRÓXIMA ATIVIDADE
 
 O que aprendemos nesta aula:
 Utilizar um Map(HashMap);
@@ -1516,3 +1512,331 @@ Utilizar a função count;
 Utilizar a função keys para devolver as chaves que o map possui;
 Utilizar a função assoc para associar um valor ao map;
 O que é threading.
+
+#### 21/10/2023
+
+@06-Map, Reduce e Filters
+
+@@01
+Projeto da aula anterior
+
+Caso queira, você pode baixar o projeto do curso no ponto em que paramos na aula anterior.
+
+https://github.com/alura-cursos/clojure-introducao/archive/aula5.zip
+
+@@02
+Destruct de sequencia, map, reduce em mapas e thread last
+
+Para continuarmos trabalhando com mapas, uma estrutura muito utilizada em Clojure, criaremos um novo arquivo aula6.clj com o namespace curso.aula6. Anteriormente, quando estudamos os vetores, nós utilizamos as funções (map), (filter) e (reduce), que trabalham com coleções. Um mapa, ou hashmap, também é uma coleção, então também podemos aplicar essas funções a ele.
+Começaremos nossos testes criando um novo pedido com o mesmo conteúdo do que fizemos na aula anterior. A ideia agora é fazermos um (map) sobre os elementos desse pedido. Quando estamos explorando o mecanismo por trás das funções, é comum definirmos nós mesmos uma função para entendermos como ocorre a iteração entre os valores da nossa coleção.
+
+Sendo assim, definiremos uma função (imprime-e-15) que recebe como parâmetro um valor, imprime na tela a mensagem "valor" seguida do valor recebido como parâmetro e, por fim, retorna o número 15. Em seguida, aplicaremos a função (map imprime-e-15 pedido) e imprimiremos o seu retorno na tela.
+
+(def pedido {:mochila { :quantidade 2, :preco 80}
+             :camiseta {:quantidade 3, :preco 40}})
+
+(defn imprime-e-15 [valor]
+  (println "valor" valor)
+  15)
+
+(println (map imprime-e-15 pedido))COPIAR CÓDIGO
+(valor [:mochila {:quantidade 2, :preco 80}]
+valor [:camiseta {:quantidade 3, :preco 40}]
+
+15 15)
+
+Repare que o símbolo valor está atrelado ("binded") a algo que parece um vetor, representado entre colchetes ([]). Mas será mesmo um vetor? Para verificarmos isso, imprimiremos também a classe do valor recebido (class valor).
+
+(defn imprime-e-15 [valor]
+  (println "valor" (class valor) valor)
+  15)
+
+(println (map imprime-e-15 pedido))COPIAR CÓDIGO
+(valor clojure.lang.MapEntry [:mochila {:quantidade 2, :preco 80}]
+valor clojure.lang.MapEntry [:camiseta {:quantidade 3, :preco 40}]
+
+15 15)
+
+Assim, descobrimos que o valor é do tipo MapEntry, ou uma "entrada do mapa", que possui uma chave e um valor. Mas por que ele é representado por colchetes? De alguma maneira, o nosso valor é composto de dois valores. Sendo assim, poderíamos chamá-lo de chave valor, ou seja, de dois parâmetros.
+
+Sendo assim, vamos redefinir a função (imprime-e-15) passando com parâmtro chave valor. No nosso (println), passaremos a imprimir chave "e" valor. Assim, a ideia é desestruturarmos (destruct) o "vetor" recebido em dois parâmetros.
+
+(defn imprime-e-15 [valor]
+  (println "valor" (class valor) valor)
+  15)
+
+(println (map imprime-e-15 pedido))
+
+(defn imprime-e-15 [chave valor]
+  (println chave "e" valor)
+  15)
+
+(println (map imprime-e-15 pedido))COPIAR CÓDIGO
+Ao executarmos o código, nossa segunda chamada, na qual esperamos receber dois parâmetros, exibirá um erro indicando que somente um argumento foi passado em (imprime-e-15), quando a sua aridade é 2.
+
+(valor clojure.lang.MapEntry [:mochila {:quantidade 2, :preco 80}]
+valor clojure.lang.MapEntry [:camiseta {:quantidade 3, :preco 40}]
+
+15 15)
+
+Syntax error (ArityException) compiling at (aula6.clj:16:1).
+
+Wrong number of args (1) passed to: curso.aula6/imprime-e-15
+
+(
+
+Isso acontece pois, como podemos perceber, só temos um parâmetro. Para conseguirmos desestruturar esse parâmetro em dois, como um vetor, precisaremos passá-lo entre colchetes, da seguinte forma:
+
+(defn imprime-e-15 [[chave valor]]
+  (println chave "e" valor)
+  15)
+
+(println (map imprime-e-15 pedido))COPIAR CÓDIGO
+Com isso, receberemos com sucesso as chaves e os valores separados:
+
+(:mochila e {:quantidade 2, :preco 80}
+:camiseta e {:quantidade 3, :preco 40}
+
+15 15)
+
+Assim aprendemos que, se for de nosso interesse, é possível desestruturarmos vetores. Para continuarmos nossos testes, ao invés de mapearmos para o número 15, faremos isso para o próprio valor.
+
+(defn imprime-e-15 [[chave valor]]
+  (println chave "<e>" valor)
+  valor)
+
+(println (map imprime-e-15 pedido))COPIAR CÓDIGO
+Dessa forma, teremos como retorno:
+
+(:mochila e {:quantidade 2, :preco 80}
+:camiseta e {:quantidade 3, :preco 40}
+
+{:quantidade 2, :preco 80} {:quantidade 3, :preco 40})
+
+Na prática, nossa devolução foi a mesma da execução de um (vals). Repare que um (map) de um dicionário/hashmap chama a função com cada entrada, incluindo chave e valor, interpretando-a como um único parâmetro.
+
+Agora queremos calcular o custo de cada um dos nossos produtos. Por exemplo, sabemos que a :mochila custará 160 reais, que é a multiplicação de 80 por 2. Da mesma forma, a :camiseta custará 120 reais. Criaremos então uma função (preco-dos-produtos) recebendo [chave valor]. Para extrairmos as quantidades e preços desse hashmap, usaremos (:quantidade valor) e (:preco valor), multiplicando-os em seguida.
+
+Por fim, chamaremos um (map) passando como parâmetros a nossa função (preco-dos-produtos) e o pedido.
+
+(defn preco-dos-produtos [[chave valor]]
+  (* (:quantidade valor) (:preco valor)))
+
+(println (map preco-dos-produtos pedido))COPIAR CÓDIGO
+Ao executarmos esse código, teremos como retorno:
+
+(160, 120)
+Ou seja, conseguimos encontrar os valores desejados com sucesso. Se quisermos, ainda podemos somar esses valores para obtermos o custo total dos produtos. Para isso, utilizaremos (reduce +).
+
+(defn preco-dos-produtos [[chave valor]]
+  (* (:quantidade valor) (:preco valor)))
+
+(println (map preco-dos-produtos pedido))
+(println (reduce + (map preco-dos-produtos pedido)))COPIAR CÓDIGO
+280
+Repare que, nesse momento, não utilizamos o parâmetro chave. Em situações como essa, nas quais queremos ignorar um dos parâmetros resultantes da desestruturação, podemos utilizar um underline (_).
+
+(defn preco-dos-produtos [[_ valor]]
+  (* (:quantidade valor) (:preco valor)))COPIAR CÓDIGO
+Ao invés de fazermos o encadeamento de funções acima, vamos extrair uma nova função (total-do-pedido) recebendo como parâmetro um pedido. Essa função se encarregará de fazer o (reduce +) de (map preco-dos-produtos pedido). Por fim, calcularemos o (total-do-pedido) e o imprimiremos na tela.
+
+(defn total-do-pedido [pedido]
+  (reduce + (map preco-dos-produtos pedido)))
+(println (total-do-pedido pedido))COPIAR CÓDIGO
+Isso funciona como deveria, mas já aprendemos que o encadeamento de funções não é tão natural. Muitas vezes, é comum extrairmos os valores e trabalharmos com eles de maneira mais simples.
+
+Pensando nisso, na função (total-do-pedido), faremos um threading a partir do pedido recebido por parâmetro e executaremos um (map), passando como parâmetro a função (preco-dos-produtos), e um (reduce +). Como dessa vez estamos trabalhando com parâmetros no threading, e não somente com funções sendo executadas em sequência, precisaremos passá-las entre parênteses, como no seguinte exemplo:
+
+(defn total-do-pedido [pedido]
+  (-> pedido
+      (map preco-dos-produtos)
+      (reduce +))
+  (reduce + (map preco-dos-produtos pedido)))
+
+(println (total-do-pedido pedido))
+COPIAR CÓDIGO
+Ao rodarmos esse código, receberemos um IllegalArgumentException indicando que existe algo errado na nossa sintaxe. Isso está acontecendo pois, quando utilizamos o operador ->, estamos executando o chamado thread first, no qual o parâmetro é lido antes da função a ser executada. Entretanto, basicamente todas as funções que trabalham com coleções usam o padrão função coleção, ou seja, com o parâmetro sendo passado no final. Para solucionarmos isso, usaremos o operador ->> para executarmos o chamado thread last,.
+
+(defn total-do-pedido [pedido]
+  (->> pedido
+      (map preco-dos-produtos)
+      (reduce +))
+  (reduce + (map preco-dos-produtos pedido)))
+
+(println (total-do-pedido pedido))COPIAR CÓDIGO
+Dessa vez o nosso código será executado corretamente e receberemos 280 como retorno no console. Por mais que o destruct do nosso mapa esteja funcionando, em algumas situações é uma coisa estranha de se fazer. Afinal, no nosso exemplo (preco-dos-produtos), somente as informações do produto são utilizadas. Sendo assim, parece fazer mais sentido que essa função receba como parâmetro um produto, e que ela se chame (preco-total-do-produto).
+
+(defn preco-total-do-produto [produto]
+  (* (:quantidade produto) (:preco produto)))COPIAR CÓDIGO
+Entretanto, teremos um problema, já que somente conseguiremos rodar esse código nas chaves do nosso pedido. Por isso, teremos que fazer uma pequena alteração na função (total-do-pedido), na qual chamaremos um vals para retornarmos os valores associados às nossas chaves, de modo a aplicarmos corretamente a função (preco-total-do-produto).
+
+(defn preco-total-do-produto [produto]
+  (* (:quantidade produto) (:preco produto)))
+
+(defn total-do-pedido
+  [pedido]
+  (->> pedido
+       vals
+       (map preco-total-do-produto)
+       (reduce +))
+  (reduce + (map preco-dos-produtos pedido)))
+
+(println (total-do-pedido pedido))COPIAR CÓDIGO
+Executando esse código, teremos como retorno 280, o nosso total do pedido, com uma construção mais natural e legível.
+
+@@03
+Filtrando mapas e criando composições com comp
+
+Já aprendemos a utilizar o (map) e o (reduce) com um mapa/hashmap. Agora vamos trabalhar com o (filter). Para começarmos, vamos redefinir o nosso pedido, incluindo agora um :chaveiro cuja :quantidade é 1 e sem nenhum :preco, ou seja, ele é gratuito.
+(def pedido {:mochila  {:quantidade 2, :preco 80}
+             :camiseta {:quantidade 3, :preco 40}
+             :chaveiro {:quantidade 1}})COPIAR CÓDIGO
+A ideia, então, é utilizarmos o (filter) para descobrirmos quais itens são gratuitos no nosso pedido. O (filter), se você se lembrar, recebe um predicado, isto é, uma função que retorna verdadeiro ou falso (ou algo equivalente a falso). Sendo assim, teremos uma função gratuito?.
+
+(filter gratuito? pedido)COPIAR CÓDIGO
+Definiremos então a função gratuito?, que receberá por parâmetro um item e, utilizando a função (get), retornará o :preco desse item. Caso esse valor não exista, o retorno será 0, que definiremos como padrão. A partir disso, verificaremos se o :preco é menor ou igual (<=) a 0.
+
+(defn gratuito?
+  [item]
+  (<= (get item :preco 0) 0))
+
+(filter gratuito? pedido)COPIAR CÓDIGO
+Para acompanharmos a execução, faremos um (println) da mensagem "Filtrando gratuitos" e então imprimiremos na tela o retorno do nosso filtro.
+
+(defn gratuito?
+  [item]
+  (<= (get item :preco 0) 0))
+
+(println "Filtrando gratuitos")
+(println (filter gratuito? pedido))COPIAR CÓDIGO
+Como retorno, teremos:
+
+([:mochila {:quantidade 2, :preco 80}] [:camiseta {:quantidade 3, :preco 40}] [:chaveiro {:quantidade 1}])COPIAR CÓDIGO
+Isso significa que temos algo errado, afinal tivemos como retorno todos os produtos, mas nem todos eles são gratuitos. Isso aconteceu pois, assim como quando utilizamos o (map), tanto as chaves quanto os valores estão sendo passados. Para resolvermos esse problema, na execução do nosso filtro, faremos (vals pedido) para obtermos somente os valores desejados.
+
+(defn gratuito?
+  [item]
+  (<= (get item :preco 0) 0))
+(println "Filtrando gratuitos")
+(println (filter gratuito? (vals pedido)))
+COPIAR CÓDIGO
+Com isso, conseguiremos obter o nosso único item gratuito:
+
+({:quantidade 1})
+Ao invés de utilizarmos o (vals), poderíamos criar uma variação da função gratuito? na qual fazemos o destruct do parâmetro recebido em [chave item] e executamos o filtro diretamente.
+
+(defn gratuito?
+  [[chave item]]
+  (<= (get item :preco 0) 0))
+(println "Filtrando gratuitos")
+(println (filter gratuito? pedido))COPIAR CÓDIGO
+Assim conseguiremos obter nosso item com sucesso:
+
+([:chaveiro {:quantidade 1}])
+Uma terceira variação seria recebermos um item normalmente e, na execução do nosso filtro, criarmos uma função lambida que recebe [chave item] e delega esses parâmetros para a função gratuito?.
+
+(defn gratuito?
+  [item]
+  (<= (get item :preco 0) 0))
+(println "Filtrando gratuitos")
+(println (filter (fn [[chave item]] (gratuito? item)) pedido))COPIAR CÓDIGO
+Da mesma forma que nas variações anteriores, a execução retornará o nosso item.
+
+([:chaveiro {:quantidade 1}])
+Também poderíamos criar uma função anônima que verifica se o segundo elemento do item recebido como parâmetro é gratuito?, o que pode ser feito com (second %), uma função que nos retorna o segundo elemento da coleção passada para ela.
+
+(defn gratuito?
+  [item]
+  (<= (get item :preco 0) 0))
+(println "Filtrando gratuitos")
+(println (filter #(gratuito? (second %)) pedido))COPIAR CÓDIGO
+Não é o caminho mais ideal, porém parece mais simples que a variação anterior. Prosseguindo, da mesma forma que temos uma função gratuito?, poderíamos ter uma função pago? que verifica os itens cujo :preco é maior do que 0. Para isso, tal função receberia um item e executaria a função gratuito? sobre ele, passando em seguida por um (not), que irá invertê-la. De modo a testarmos esse código rapidamente, passaremos diretamente um item com :preco 50 e outro com :preco 0, e imprimiremos o resultado das execuções na tela.
+
+(defn pago?
+  [item]
+  (not (gratuito? item)))
+
+(println (pago? {:preco 50}))
+(println (pago? {:preco 0}))COPIAR CÓDIGO
+Como retorno, teremos:
+
+true
+false
+
+Repare então que o pago? é uma composição de duas funções, (not) e gratuito?. Sendo assim, poderíamos defini-la da forma (comp not gratuito?) e aplicá-la a um item.
+
+(println ((comp not gratuito?) {:preco 50}))COPIAR CÓDIGO
+true
+Assim, definimos uma função e a invocamos na mesma linha, o que não é o ideal. O mais interessante seria definirmos um símbolo pago? como a função retornada pelo código (comp not gratuito?).
+
+(def pago? (comp not gratuito?))
+(println (pago? {:preco 50}))
+(println (pago? {:preco 0}))COPIAR CÓDIGO
+Repare que, como dissemos anteriormente, pago? não é uma função, mas sim um símbolo que referencia a função retornada pelo (comp), muito utilizado no dia-a-dia para compor o comportamento de funções sem aplicá-los imediatamente.
+
+@@04
+Map reduce
+
+Dado o vetor a seguir:
+(def clientes [
+  { :nome "Guilherme"
+    :certificados ["Clojure" "Java" "Machine Learning"] }
+    { :nome "Paulo"
+      :certificados ["Java" "Ciência da Computação"] }
+    { :nome "Daniela"
+      :certificados ["Arquitetura" "Gastronomia"] }])COPIAR CÓDIGO
+Como calcular o total de certificados de todos os clientes?
+
+(-> clientes (map :certificados) (map count) (reduce +))
+ 
+Alternativa correta
+(->> clientes (map :certificados) (map count) (reduce +))
+ 
+Extraimos os certificados, contamos e depois somamos.
+Alternativa correta
+(-> clientes (map :certificados) count (reduce +))
+ 
+O thread first não é a maneira padrão das APIs de mapa, reduce etc.
+Alternativa correta
+(->> clientes (map :certificados) count (reduce +))
+ 
+O count deve ser aplicado a cada um dos vetores, portanto teremos que "mapeá-lo"
+
+@@05
+Faça como eu fiz na aula
+
+Chegou a hora de você seguir todos os passos realizados por mim durantes esta aula. Caso já tenha feito, excelente. Se ainda não, é importante que você implemente o que foi visto no vídeo para poder continuar com a próxima aula, que tem como pré-requisito todo o código aqui escrito. Se por acaso você já domina essa parte, em cada capítulo, você poderá baixar o projeto feito até aquele ponto.
+
+O gabarito deste exercício é o passo a passo demonstrado no vídeo. Tenha certeza de que tudo está certo antes de continuar. Ficou com dúvida? Podemos te ajudar pelo nosso fórum.
+
+@@06
+Conclusão
+
+Parabéns, você concluiu o primeiro curso de introdução à linguagem Clojure! Vamos recapitular os assuntos que vimos ao longo desse treinamento?
+Começamos falando sobre a sintaxe da linguagem, invocando funções e aprendendo que isso ocorre de maneira um pouco diferente do que estamos acostumados em outras linguagens. Nesse ponto, aprendemos que é possível criar símbolos e atribuir valores a eles, sejam eles números escalares, strings ou mesmo funções - inclusive, é possível passar uma função como parâmetro de outra função, o que chamamos de high order functions.
+
+Prosseguindo, discutimos como definir funções e receber parâmetros, e passamos a utilizar o IntelliJ, que facilitou bastante a construção dos nossos códigos. Além disso, ele nos trouxe o REPL, que, utilizando um projeto criado pelo Leiningen, nos permitiu executar os nossos testes.
+
+Aprendemos também a criar símbolos locais, trabalhar com condicionais, isolar comportamentos e compor funções por meio de outras funções. Ao adentrarmos o mundo das coleções, mais especificamente vetores e mapas, conhecemos a tríade de funções mais importantes para o trabalho com esse tipo de objeto: (map), (reduce) e (filter). Também descobrimos como adicionar, remover ou alterar valores nas nossas coleções, sempre pensando em imutabilidade - ou seja, as funções não alteram os valores referenciados por um símbolo, apenas retorna um novo mapa ou vetor com as mudanças atribuídas.
+
+Mais adiante, trabalhamos não só com mapas simples, de "uma dimensão", como também com mapas mais complexos, cujos valores são outros mapas. Ao longo desse processo, questões de boas práticas, legibilidade e como trabalhar com funções foram aparecendo e sendo discutidas.
+
+Agora que temos uma noção melhor da linguagem, conseguiremos conectar esses aprendizados com os nossos conhecimentos de estrutura de dados, algoritmos e outros conteúdos, de modo a utilizarmos as estruturas corretas no momento adequado para trazer os benefícios desejados. Nos cursos futuros, conheceremos ainda outros benefícios de trabalhar com o Clojure.
+
+Bons estudos e até a próxima!
+
+@@07
+Projeto do curso
+
+Caso queira, você pode baixar aqui o projeto do curso no ponto em que paramos na aula anterior.
+
+https://github.com/alura-cursos/clojure-introducao/archive/aula6.zip
+
+@@08
+O que aprendemos?
+
+O que aprendemos nesta aula:
+Utilizar o destruct para um dicionário;
+Utilizar o Thread last;
+Utilizar o map, reduce e filter em um mapa;
+Criar composição com o comp;
